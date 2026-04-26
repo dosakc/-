@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>طلال سالم المالكي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --purple: #9b59b6; --cyan: #5ad1cd; --dark: #0a0a0f;
+            --card: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.08);
+            --text: #e8e8f0; --muted: rgba(255,255,255,0.45);
+        }
+        body { font-family:'Tajawal',sans-serif; background:var(--dark); color:var(--text); min-height:100vh; overflow-x:hidden; -webkit-tap-highlight-color:transparent; }
+
+        .bg { position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+        .bg::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 20% 20%,rgba(155,89,182,.18) 0%,transparent 60%),radial-gradient(ellipse 60% 80% at 80% 80%,rgba(90,209,205,.14) 0%,transparent 60%),radial-gradient(ellipse 50% 50% at 50% 50%,rgba(132,205,250,.08) 0%,transparent 70%); animation:bgShift 10s ease-in-out infinite alternate; }
+        @keyframes bgShift { 0%{opacity:1;transform:scale(1)} 100%{opacity:.7;transform:scale(1.05)} }
+        .orb { position:absolute; border-radius:50%; filter:blur(60px); }
+        .orb1 { width:300px; height:300px; background:rgba(155,89,182,.12); top:10%; left:5%; animation:fA 18s ease-in-out infinite; }
+        .orb2 { width:200px; height:200px; background:rgba(90,209,205,.10); top:60%; left:70%; animation:fB 14s ease-in-out infinite; }
+        .orb3 { width:250px; height:250px; background:rgba(132,205,250,.09); top:30%; left:55%; animation:fC 20s ease-in-out infinite; }
+        @keyframes fA { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-40px)} }
+        @keyframes fB { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-40px,25px)} }
+        @keyframes fC { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,35px)} }
+        .grid-lines { position:absolute; inset:0; background-image:linear-gradient(rgba(155,89,182,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(155,89,182,.06) 1px,transparent 1px); background-size:60px 60px; }
+
+        #loading { position:fixed; inset:0; background:var(--dark); display:flex; justify-content:center; align-items:center; flex-direction:column; gap:28px; z-index:9999; transition:opacity .6s; }
+        #loading.hide { opacity:0; pointer-events:none; }
+        .spinner { position:relative; border-radius:50%; height:96px; width:96px; animation:spin 1.2s linear infinite; background:linear-gradient(#9b59b6,#84cdfa,#5ad1cd); }
+        .spinner span { position:absolute; border-radius:50%; height:100%; width:100%; background:linear-gradient(#9b59b6,#84cdfa,#5ad1cd); }
+        .spinner span:nth-child(1){filter:blur(5px)} .spinner span:nth-child(2){filter:blur(10px)} .spinner span:nth-child(3){filter:blur(25px)} .spinner span:nth-child(4){filter:blur(50px)}
+        .spinner::after { content:""; position:absolute; top:10px; left:10px; right:10px; bottom:10px; background:var(--dark); border:5px solid var(--dark); border-radius:50%; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        .loading-text { font-size:1rem; font-weight:500; color:var(--muted); letter-spacing:.15em; animation:pulse 1.5s ease-in-out infinite; }
+        @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+        .header { position:fixed; top:0; left:0; right:0; height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; background:rgba(10,10,15,.85); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-bottom:1px solid var(--border); z-index:300; }
+        .header-title { font-size:1.05rem; font-weight:800; background:linear-gradient(90deg,var(--purple),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .menu-btn { width:40px; height:40px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px; cursor:pointer; border-radius:10px; border:1px solid var(--border); background:var(--card); transition:all .2s; }
+        .menu-btn:hover { background:rgba(155,89,182,.15); border-color:rgba(155,89,182,.4); }
+        .menu-btn span { display:block; width:18px; height:2px; background:var(--text); border-radius:2px; }
+
+        #overlay { display:none; position:fixed; top:0; bottom:0; left:0; right:260px; background:rgba(0,0,0,.55); z-index:350; cursor:pointer; }
+        #overlay.show { display:block; }
+
+        #sidebar { position:fixed; top:0; bottom:0; right:-290px; width:260px; background:#0a0a12; border-left:1px solid var(--border); z-index:400; transition:right .3s ease; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+        #sidebar.open { right:0; }
+        .sb-header { padding:24px 20px 16px; border-bottom:1px solid var(--border); }
+        .sb-logo { font-size:1rem; font-weight:900; background:linear-gradient(90deg,var(--purple),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:2px; }
+        .sb-sub { font-size:.72rem; color:var(--muted); }
+        .sb-section { padding:12px 12px 4px; font-size:.7rem; font-weight:700; color:var(--muted); letter-spacing:.1em; }
+        .nav-item { display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:12px; cursor:pointer; color:var(--muted); font-size:.9rem; font-weight:600; transition:all .2s; margin:2px 8px; }
+        .nav-item:hover { background:rgba(155,89,182,.14); color:var(--text); }
+        .nav-item.on { background:rgba(155,89,182,.18); color:#fff; }
+        .nav-item .ni { font-size:1.1rem; width:22px; text-align:center; }
+
+        #app { position:relative; z-index:1; }
+        .content { padding:80px 20px 40px; max-width:700px; margin:0 auto; }
+        .screen { display:none; }
+        .screen.on { display:block; }
+
+        .home-hero { text-align:center; padding:36px 20px 28px; }
+        .home-avatar { width:88px; height:88px; border-radius:50%; background:linear-gradient(135deg,var(--purple),var(--cyan)); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:2rem; font-weight:900; color:#fff; box-shadow:0 0 40px rgba(155,89,182,.4); }
+        .home-name { font-size:1.6rem; font-weight:900; background:linear-gradient(135deg,#fff 20%,var(--cyan) 80%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:5px; }
+        .home-role { font-size:.86rem; color:var(--muted); margin-bottom:26px; }
+        .home-stats { display:flex; justify-content:center; gap:14px; flex-wrap:wrap; margin-bottom:30px; }
+        .stat-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:13px 20px; text-align:center; min-width:84px; }
+        .stat-num { font-size:1.4rem; font-weight:900; background:linear-gradient(135deg,var(--purple),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .stat-lbl { font-size:.7rem; color:var(--muted); margin-top:2px; }
+        .home-section-title { font-size:.95rem; font-weight:700; color:var(--muted); margin-bottom:12px; }
+        .home-quick { display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-bottom:24px; }
+        .quick-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:17px 15px; cursor:pointer; transition:all .25s; position:relative; overflow:hidden; }
+        .quick-card::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(155,89,182,.08),rgba(90,209,205,.05)); opacity:0; transition:.25s; }
+        .quick-card:hover { border-color:rgba(155,89,182,.5); transform:translateY(-2px); box-shadow:0 8px 28px rgba(155,89,182,.15); }
+        .quick-card:hover::before { opacity:1; }
+        .qc-icon { font-size:1.7rem; margin-bottom:7px; }
+        .qc-title { font-size:.88rem; font-weight:700; }
+        .qc-sub { font-size:.73rem; color:var(--muted); margin-top:2px; }
+
+        .page-heading { margin-bottom:22px; }
+        .page-heading h1 { font-size:1.7rem; font-weight:800; background:linear-gradient(135deg,#fff 30%,var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:4px; }
+        .page-heading p { color:var(--muted); font-size:.84rem; }
+        .lessons-grid { display:grid; gap:12px; }
+        .lesson-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px 20px; cursor:pointer; display:flex; align-items:center; gap:14px; transition:all .25s; position:relative; overflow:hidden; }
+        .lesson-card::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(155,89,182,.07),rgba(90,209,205,.05)); opacity:0; transition:.25s; }
+        .lesson-card:hover { border-color:rgba(155,89,182,.5); transform:translateY(-2px); box-shadow:0 8px 28px rgba(155,89,182,.15); }
+        .lesson-card:hover::before { opacity:1; }
+        .lesson-num { width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg,var(--purple),var(--cyan)); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.95rem; color:#fff; flex-shrink:0; }
+        .lesson-info h3 { font-size:.95rem; font-weight:600; margin-bottom:2px; }
+        .lesson-info p { font-size:.78rem; color:var(--muted); }
+        .lesson-arrow { margin-right:auto; color:var(--muted); transition:transform .2s; }
+        .lesson-card:hover .lesson-arrow { transform:translateX(-4px); color:var(--cyan); }
+
+        .lesson-topbar { display:flex; align-items:center; gap:12px; margin-bottom:22px; }
+        .back-btn { width:36px; height:36px; border-radius:10px; flex-shrink:0; border:1px solid var(--border); background:var(--card); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1rem; transition:all .2s; }
+        .back-btn:hover { background:rgba(155,89,182,.15); border-color:rgba(155,89,182,.4); }
+        .lesson-topbar h2 { font-size:1.2rem; font-weight:800; background:linear-gradient(90deg,var(--purple),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; flex:1; }
+        .fs-btn { width:36px; height:36px; border-radius:10px; flex-shrink:0; border:1px solid var(--border); background:var(--card); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1rem; transition:all .2s; }
+        .fs-btn:hover { background:rgba(90,209,205,.15); border-color:rgba(90,209,205,.4); }
+        .prog-wrap { margin-bottom:20px; }
+        .prog-labels { display:flex; justify-content:space-between; font-size:.75rem; color:var(--muted); margin-bottom:5px; }
+        .prog-bar { height:4px; background:var(--border); border-radius:4px; overflow:hidden; }
+        .prog-fill { height:100%; background:linear-gradient(90deg,var(--purple),var(--cyan)); border-radius:4px; transition:width .4s; }
+
+        /* PAGE CARD — normal view */
+        .page-card { background:var(--card); border:1px solid var(--border); border-radius:20px; overflow:hidden; margin-bottom:16px; animation:fadeUp .35s ease; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .page-img-only { width:100%; max-height:400px; object-fit:contain; display:block; background:#000; }
+
+        /* ✅ صورة أكبر في img-text — العرض الكامل مع ارتفاع أكبر */
+        .page-img-top { width:100%; height:340px; object-fit:cover; display:block; }
+
+        .page-text { padding:20px 22px; line-height:1.9; font-size:1rem; }
+        .page-text-only { padding:24px 22px; line-height:1.9; font-size:1rem; }
+        .placeholder-box { padding:32px 20px; background:rgba(155,89,182,.04); border-bottom:1px dashed rgba(155,89,182,.3); text-align:center; }
+        .placeholder-box .ico { font-size:2rem; opacity:.4; margin-bottom:6px; }
+        .placeholder-box .lbl { font-size:.85rem; font-weight:600; color:var(--purple); }
+        .placeholder-box .sub { font-size:.72rem; color:var(--muted); margin-top:2px; }
+
+        .watch-wrap { padding:0 22px 22px; display:flex; flex-direction:column; align-items:flex-end; gap:7px; }
+        .btn-watch { font-size:1rem; padding:.8rem 2.2rem; border:none; outline:none; border-radius:.4rem; cursor:pointer; text-transform:uppercase; background-color:rgb(14,14,26); color:rgb(234,234,234); font-family:'Tajawal',sans-serif; font-weight:700; transition:.6s; box-shadow:0 0 60px #1f4c65; -webkit-box-reflect:below 8px linear-gradient(to bottom,rgba(0,0,0,0.0),rgba(0,0,0,0.4)); text-decoration:none; display:inline-block; }
+        .btn-watch:active { scale:.92; }
+        .btn-watch:hover { background:linear-gradient(270deg,rgba(2,29,78,.68) 0%,rgba(31,215,232,.87) 60%); color:rgb(4,4,38); }
+        .watch-label { font-size:.76rem; color:var(--muted); }
+
+        .page-nav { display:flex; gap:12px; margin-bottom:24px; }
+        .pnav-btn { flex:1; padding:12px; border-radius:12px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'Tajawal',sans-serif; font-size:.88rem; font-weight:600; cursor:pointer; transition:all .2s; }
+        .pnav-btn:hover:not(:disabled) { background:rgba(155,89,182,.15); border-color:rgba(155,89,182,.5); }
+        .pnav-btn:disabled { opacity:.3; cursor:not-allowed; }
+        .pnav-btn.primary { background:linear-gradient(135deg,var(--purple),#6c3694); border-color:transparent; }
+        .pnav-btn.primary:hover { opacity:.85; }
+
+        .q-header { margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; }
+        .q-header h3 { font-size:1.05rem; font-weight:700; background:linear-gradient(90deg,var(--purple),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .q-counter { font-size:.8rem; color:var(--muted); }
+        .q-card { background:var(--card); border:1px solid var(--border); border-radius:18px; padding:22px; margin-bottom:14px; animation:fadeUp .35s ease; }
+        .q-text { font-size:1rem; font-weight:600; margin-bottom:18px; line-height:1.75; }
+        .ans-btns { display:flex; gap:12px; }
+        .ans-btn { flex:1; padding:12px; border-radius:12px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'Tajawal',sans-serif; font-size:.92rem; font-weight:700; cursor:pointer; transition:all .2s; }
+        .ans-btn.gbtn:hover { background:rgba(46,204,113,.15); border-color:#2ecc71; }
+        .ans-btn.rbtn:hover { background:rgba(231,76,60,.15); border-color:#e74c3c; }
+        .ans-btn.right { background:rgba(46,204,113,.2); border-color:#2ecc71; color:#2ecc71; }
+        .ans-btn.wrong { background:rgba(231,76,60,.15); border-color:#e74c3c; color:#e74c3c; }
+        .ans-btn:disabled { cursor:default; }
+        .res-area { margin-top:14px; }
+        .res-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:20px; font-size:.84rem; font-weight:600; }
+        .res-badge.ok { background:rgba(46,204,113,.1); color:#2ecc71; border:1px solid rgba(46,204,113,.3); }
+        .res-badge.bad { background:rgba(231,76,60,.1); color:#e74c3c; border:1px solid rgba(231,76,60,.3); }
+        .q-next-btn { margin-top:14px; width:100%; padding:11px; border-radius:12px; border:none; background:linear-gradient(135deg,var(--purple),#6c3694); color:#fff; font-family:'Tajawal',sans-serif; font-size:.9rem; font-weight:700; cursor:pointer; transition:opacity .2s; }
+        .q-next-btn:hover { opacity:.85; }
+        .q-done-card { background:var(--card); border:1px solid rgba(46,204,113,.3); border-radius:18px; padding:28px; text-align:center; animation:fadeUp .4s ease; }
+        .q-done-icon { font-size:2.8rem; margin-bottom:10px; }
+        .q-done-title { font-size:1.2rem; font-weight:800; color:#2ecc71; margin-bottom:6px; }
+        .q-done-sub { font-size:.85rem; color:var(--muted); }
+        .q-score { font-size:2rem; font-weight:900; background:linear-gradient(135deg,#2ecc71,var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin:10px 0; }
+
+        /* FULLSCREEN */
+        #fsOverlay { display:none; position:fixed; inset:0; background:#000; z-index:2000; flex-direction:column; }
+        #fsOverlay.show { display:flex; }
+        #fsTopbar { height:56px; background:rgba(0,0,0,.85); backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:space-between; padding:0 20px; border-bottom:1px solid var(--border); flex-shrink:0; }
+        #fsTitle { font-size:1rem; font-weight:700; background:linear-gradient(90deg,var(--purple),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .fs-close-btn { padding:7px 16px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'Tajawal',sans-serif; font-size:.82rem; font-weight:600; cursor:pointer; transition:all .2s; }
+        .fs-close-btn:hover { background:rgba(231,76,60,.15); border-color:#e74c3c; color:#e74c3c; }
+        #fsProgWrap { padding:8px 20px 0; flex-shrink:0; }
+        .fs-prog-bar { height:3px; background:var(--border); border-radius:4px; overflow:hidden; }
+        .fs-prog-fill { height:100%; background:linear-gradient(90deg,var(--purple),var(--cyan)); border-radius:4px; transition:width .4s; }
+        #fsBody { flex:1; overflow:hidden; display:flex; flex-direction:column; position:relative; }
+
+        #fsBody .fs-img-only-wrap { flex:1; display:flex; align-items:center; justify-content:center; background:#000; overflow:hidden; }
+        #fsBody .fs-img-only-wrap img { width:100%; height:100%; object-fit:contain; display:block; }
+        #fsBody .fs-img-only-wrap .fs-placeholder { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; color:var(--muted); font-size:1rem; }
+        #fsBody .fs-img-only-wrap .fs-placeholder .ico { font-size:3.5rem; opacity:.3; }
+
+        /* ✅ FS img-text: صورة أكبر — 65% من الارتفاع */
+        #fsBody .fs-img-text-wrap { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+        #fsBody .fs-img-text-wrap .fs-img-half { flex:0 0 65%; overflow:hidden; background:#000; display:flex; align-items:center; justify-content:center; }
+        #fsBody .fs-img-text-wrap .fs-img-half img { width:100%; height:100%; object-fit:cover; display:block; }
+        #fsBody .fs-img-text-wrap .fs-img-half .fs-placeholder { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:var(--muted); width:100%; height:100%; }
+        #fsBody .fs-img-text-wrap .fs-img-half .fs-placeholder .ico { font-size:3rem; opacity:.3; }
+        #fsBody .fs-img-text-wrap .fs-text-half { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 36px; line-height:2; font-size:1.15rem; background:rgba(0,0,0,.75); border-top:1px solid var(--border); }
+
+        #fsBody .fs-text-only-wrap { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex; align-items:flex-start; justify-content:center; padding:40px; }
+        #fsBody .fs-text-only-wrap .fs-text-inner { max-width:760px; font-size:1.25rem; line-height:2.1; width:100%; }
+        #fsBody .fs-watch-wrap { padding:14px 24px 18px; display:flex; align-items:center; justify-content:flex-end; gap:10px; background:rgba(0,0,0,.7); border-top:1px solid var(--border); flex-shrink:0; }
+        #fsBody .btn-watch-fs { font-size:1.1rem; padding:.85rem 2.6rem; border:none; outline:none; border-radius:.4rem; cursor:pointer; text-transform:uppercase; background-color:rgb(14,14,26); color:rgb(234,234,234); font-family:'Tajawal',sans-serif; font-weight:700; transition:.6s; box-shadow:0 0 60px #1f4c65; -webkit-box-reflect:below 8px linear-gradient(to bottom,rgba(0,0,0,0.0),rgba(0,0,0,0.4)); text-decoration:none; display:inline-block; }
+        #fsBody .btn-watch-fs:active { scale:.92; }
+        #fsBody .btn-watch-fs:hover { background:linear-gradient(270deg,rgba(2,29,78,.68) 0%,rgba(31,215,232,.87) 60%); color:rgb(4,4,38); }
+        #fsBody .fs-watch-label { font-size:.82rem; color:var(--muted); }
+        #fsBody .fs-q-wrap { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:24px 20px; display:flex; flex-direction:column; gap:0; }
+
+        #fsNavRow { display:flex; gap:12px; padding:14px 20px; border-top:1px solid var(--border); flex-shrink:0; }
+        .fs-nav-btn { flex:1; padding:12px; border-radius:12px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'Tajawal',sans-serif; font-size:.9rem; font-weight:600; cursor:pointer; transition:all .2s; }
+        .fs-nav-btn:hover:not(:disabled) { background:rgba(155,89,182,.15); }
+        .fs-nav-btn:disabled { opacity:.3; cursor:not-allowed; }
+        .fs-nav-btn.primary { background:linear-gradient(135deg,var(--purple),#6c3694); border-color:transparent; }
+
+        .att-toprow { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
+        .btn-primary { display:flex; align-items:center; gap:6px; padding:9px 16px; background:linear-gradient(135deg,var(--purple),#6c3694); border:none; border-radius:12px; color:#fff; font-family:'Tajawal',sans-serif; font-size:.85rem; font-weight:700; cursor:pointer; transition:opacity .2s; }
+        .btn-primary:hover { opacity:.85; }
+
+        .class-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+        .ctab-wrap { display:inline-flex; align-items:center; background:var(--card); border:1px solid var(--border); border-radius:20px; overflow:hidden; transition:all .2s; }
+        .ctab-wrap.on { background:linear-gradient(135deg,var(--purple),#6c3694); border-color:transparent; }
+        .ctab-wrap:not(.on):hover { border-color:rgba(155,89,182,.4); }
+        .ctab-name { padding:7px 14px; color:var(--muted); font-family:'Tajawal',sans-serif; font-size:.82rem; font-weight:600; cursor:pointer; background:transparent; border:none; outline:none; }
+        .ctab-wrap.on .ctab-name { color:#fff; }
+        .ctab-wrap:not(.on) .ctab-name:hover { color:var(--text); }
+        .ctab-del { width:28px; height:28px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted); font-size:.72rem; border:none; background:transparent; border-right:1px solid rgba(255,255,255,.08); transition:color .2s; padding:0; flex-shrink:0; }
+        .ctab-wrap.on .ctab-del { border-right-color:rgba(255,255,255,.2); color:rgba(255,255,255,.6); }
+        .ctab-del:hover { color:#e74c3c !important; }
+
+        .toolbar { display:flex; gap:8px; align-items:center; margin-bottom:14px; flex-wrap:wrap; }
+        .search-wrap { flex:1; min-width:150px; position:relative; }
+        .search-wrap input { width:100%; padding:9px 34px 9px 12px; background:var(--card); border:1px solid var(--border); border-radius:12px; color:var(--text); font-family:'Tajawal',sans-serif; font-size:.86rem; outline:none; }
+        .search-wrap input:focus { border-color:rgba(155,89,182,.5); }
+        .search-wrap input::placeholder { color:var(--muted); }
+        .search-icon { position:absolute; right:11px; top:50%; transform:translateY(-50%); color:var(--muted); pointer-events:none; }
+        .btn-sm { padding:8px 13px; border-radius:12px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'Tajawal',sans-serif; font-size:.8rem; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; }
+        .btn-sm:hover { background:rgba(155,89,182,.15); border-color:rgba(155,89,182,.4); }
+        .btn-sm.red:hover { background:rgba(231,76,60,.15); border-color:rgba(231,76,60,.4); color:#e74c3c; }
+        .date-badge { display:inline-flex; align-items:center; gap:6px; padding:5px 13px; background:var(--card); border:1px solid var(--border); border-radius:20px; font-size:.77rem; color:var(--muted); margin-bottom:10px; }
+        .day-input-wrap { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+        .day-input-wrap label { font-size:.82rem; color:var(--muted); white-space:nowrap; }
+        .day-input-wrap input { flex:1; padding:8px 12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-family:'Tajawal',sans-serif; font-size:.88rem; outline:none; }
+        .day-input-wrap input:focus { border-color:rgba(155,89,182,.5); }
+        .student-list { display:flex; flex-direction:column; gap:9px; margin-bottom:20px; }
+        .s-row { background:var(--card); border:1px solid var(--border); border-radius:13px; padding:12px 15px; display:flex; align-items:center; gap:11px; transition:border-color .2s; }
+        .s-row.sp { border-color:rgba(46,204,113,.35); }
+        .s-row.sa { border-color:rgba(231,76,60,.35); }
+        .s-row.se { border-color:rgba(230,126,34,.35); }
+        .s-avatar { width:34px; height:34px; border-radius:9px; flex-shrink:0; background:linear-gradient(135deg,var(--purple),var(--cyan)); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.85rem; color:#fff; }
+        .s-name { font-size:.9rem; font-weight:600; flex:1; }
+        .st-btns { display:flex; gap:5px; }
+        .st-btn { padding:5px 9px; border-radius:7px; border:1px solid var(--border); background:transparent; color:var(--muted); font-family:'Tajawal',sans-serif; font-size:.7rem; font-weight:700; cursor:pointer; transition:all .2s; }
+        .st-btn.sp { border-color:rgba(46,204,113,.35); color:#2ecc71; }
+        .st-btn.sa { border-color:rgba(231,76,60,.35); color:#e74c3c; }
+        .st-btn.se { border-color:rgba(230,126,34,.35); color:#e67e22; }
+        .st-btn.sp.sel { background:rgba(46,204,113,.2); }
+        .st-btn.sa.sel { background:rgba(231,76,60,.2); }
+        .st-btn.se.sel { background:rgba(230,126,34,.2); }
+        .save-row { margin-bottom:28px; }
+        .btn-save { display:flex; align-items:center; gap:8px; padding:12px 26px; background:linear-gradient(135deg,#2ecc71,#27ae60); border:none; border-radius:14px; color:#fff; font-family:'Tajawal',sans-serif; font-size:.9rem; font-weight:700; cursor:pointer; transition:opacity .2s; box-shadow:0 4px 20px rgba(46,204,113,.25); }
+        .btn-save:hover { opacity:.85; }
+
+        .records-screen-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px; margin-bottom:14px; }
+        .rsc-class { font-size:.76rem; font-weight:700; color:var(--purple); margin-bottom:10px; letter-spacing:.06em; }
+        .rsc-entry { background:rgba(0,0,0,.2); border-radius:12px; padding:14px; margin-bottom:8px; }
+        .rec-date { font-size:.79rem; font-weight:700; color:var(--cyan); margin-bottom:4px; }
+        .rec-day-note { font-size:.84rem; font-weight:600; color:var(--text); margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+        .rec-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid var(--border); font-size:.83rem; }
+        .rec-row:last-child { border-bottom:none; }
+        .dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-left:4px; }
+        .dp{background:#2ecc71;} .da{background:#e74c3c;} .de{background:#e67e22;}
+        .rec-actions { display:flex; gap:7px; margin-top:12px; }
+        .rec-act-btn { padding:5px 13px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--muted); font-family:'Tajawal',sans-serif; font-size:.75rem; font-weight:600; cursor:pointer; transition:all .2s; }
+        .rec-act-btn.edit:hover { background:rgba(155,89,182,.15); border-color:var(--purple); color:var(--purple); }
+        .rec-act-btn.del:hover { background:rgba(231,76,60,.15); border-color:#e74c3c; color:#e74c3c; }
+        .empty-state { text-align:center; padding:44px 20px; color:var(--muted); }
+        .empty-state .ei { font-size:2.5rem; margin-bottom:8px; opacity:.35; }
+
+        #modalBg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); backdrop-filter:blur(5px); z-index:600; align-items:center; justify-content:center; }
+        #modalBg.show { display:flex; }
+        .modal-box { background:#13131e; border:1px solid var(--border); border-radius:20px; padding:26px 22px; width:90%; max-width:370px; animation:fadeUp .3s ease; }
+        .modal-box h3 { font-size:1rem; font-weight:700; margin-bottom:14px; }
+        .modal-box input,.modal-box textarea { width:100%; padding:10px 14px; background:var(--card); border:1px solid var(--border); border-radius:11px; color:var(--text); font-family:'Tajawal',sans-serif; font-size:.9rem; outline:none; margin-bottom:14px; resize:none; }
+        .modal-box input:focus,.modal-box textarea:focus { border-color:rgba(155,89,182,.5); }
+        .modal-btns { display:flex; gap:10px; }
+        .modal-btns button { flex:1; padding:10px; border-radius:11px; border:none; font-family:'Tajawal',sans-serif; font-size:.88rem; font-weight:700; cursor:pointer; }
+        .mbtn-ok { background:linear-gradient(135deg,var(--purple),#6c3694); color:#fff; }
+        .mbtn-cancel { background:var(--card); border:1px solid var(--border)!important; color:var(--muted); }
+
+        .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg,#2ecc71,#27ae60); color:#fff; padding:11px 26px; border-radius:28px; font-family:'Tajawal',sans-serif; font-weight:700; font-size:.9rem; z-index:800; box-shadow:0 4px 20px rgba(46,204,113,.4); animation:fadeUp .3s ease; white-space:nowrap; }
+
+        @media (max-width:480px) {
+            .header { padding:0 14px; }
+            .content { padding:72px 12px 40px; }
+            .home-name { font-size:1.25rem; }
+            .home-stats { gap:8px; }
+            .stat-card { padding:10px 12px; min-width:68px; }
+            .lesson-topbar h2 { font-size:1rem; }
+            /* ✅ صورة img-text على الجوال: أصغر شوي لتناسب الشاشة */
+            .page-img-top { height:220px; }
+            .st-btns { flex-direction:column; gap:3px; }
+            .st-btn { font-size:.68rem; padding:4px 7px; }
+            .s-name { font-size:.84rem; }
+            .day-input-wrap { flex-direction:column; align-items:flex-start; }
+            .day-input-wrap input { width:100%; }
+            .ans-btns { gap:8px; }
+            .page-nav { gap:8px; }
+            #fsBody .fs-img-text-wrap .fs-img-half { flex:0 0 55%; }
+            #fsBody .fs-img-text-wrap .fs-text-half { padding:14px 18px; font-size:1rem; }
+            #fsBody .fs-text-only-wrap { padding:24px 16px; }
+            #fsBody .fs-text-only-wrap .fs-text-inner { font-size:1.05rem; }
+        }
+        @supports (padding:max(0px)) {
+            .content { padding-bottom:max(40px,env(safe-area-inset-bottom)); }
+            #fsNavRow { padding-bottom:max(14px,env(safe-area-inset-bottom)); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg"><div class="grid-lines"></div><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
+<div id="loading"><div class="spinner"><span></span><span></span><span></span><span></span></div><div class="loading-text">جاري التحميل...</div></div>
+<div id="overlay"></div>
+
+<div id="modalBg">
+    <div class="modal-box">
+        <h3 id="mTitle">إضافة</h3>
+        <input type="text" id="mInput" placeholder="">
+        <div class="modal-btns">
+            <button class="mbtn-ok" onclick="modalOK()">تأكيد</button>
+            <button class="mbtn-cancel" onclick="closeModal()">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<div id="fsOverlay">
+    <div id="fsTopbar"><span id="fsTitle"></span><button class="fs-close-btn" onclick="closeFS()">✕ إغلاق</button></div>
+    <div id="fsProgWrap"><div class="fs-prog-bar"><div class="fs-prog-fill" id="fsFill" style="width:0%"></div></div></div>
+    <div id="fsBody"></div>
+    <div id="fsNavRow">
+        <button class="fs-nav-btn" id="fsPrev" onclick="fsPrevPage()">← السابق</button>
+        <button class="fs-nav-btn primary" id="fsNext" onclick="fsNextPage()">التالي →</button>
+    </div>
+</div>
+
+<div id="app">
+    <div class="header">
+        <div class="header-title">طلال سالم المالكي</div>
+        <div class="menu-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></div>
+    </div>
+    <div id="sidebar">
+        <div class="sb-header">
+            <div class="sb-logo">المعلم : طلال سالم المالكي</div>
+            <div class="sb-sub">موقع مادة الاحياء تعود الحقوق الى المعلم طلال سالم المالكي</div>
+        </div>
+        <div class="sb-section">القائمة</div>
+        <div class="nav-item on" id="ni-home" onclick="goTo('home')"><span class="ni"></span> الصفحة الرئيسية</div>
+        <div class="nav-item" id="ni-lessons" onclick="goTo('lessons')"><span class="ni"></span> الدروس</div>
+        <div class="sb-section">الحضور</div>
+        <div class="nav-item" id="ni-attend" onclick="goTo('attend')"><span class="ni"></span> تسجيل الحضور</div>
+        <div class="nav-item" id="ni-records" onclick="goTo('records')"><span class="ni"></span> شواهد الحضور</div>
+    </div>
+    <div class="content">
+        <div class="screen on" id="sc-home">
+            <div class="home-hero">
+                <div class="home-avatar">ط</div>
+                <div class="home-name">المعلم : طلال سالم المالكي</div>
+                <div class="home-role">موقع مادة الاحياء تعود الحقوق الى المعلم طلال سالم المالكي</div>
+                <div class="home-stats">
+                    <div class="stat-card"><div class="stat-num" id="stat-lessons">0</div><div class="stat-lbl">درس</div></div>
+                    <div class="stat-card"><div class="stat-num" id="stat-classes">0</div><div class="stat-lbl">فصل</div></div>
+                    <div class="stat-card"><div class="stat-num" id="stat-students">0</div><div class="stat-lbl">طالب</div></div>
+                    <div class="stat-card"><div class="stat-num" id="stat-records">0</div><div class="stat-lbl">سجل</div></div>
+                </div>
+            </div>
+            <div class="home-section-title">وصول سريع</div>
+            <div class="home-quick">
+                <div class="quick-card" onclick="goTo('lessons')"><div class="qc-icon"></div><div class="qc-title">الدروس</div><div class="qc-sub">عرض وشرح الدروس</div></div>
+                <div class="quick-card" onclick="goTo('attend')"><div class="qc-icon"></div><div class="qc-title">تسجيل الحضور</div><div class="qc-sub">حضور وغياب الطلاب</div></div>
+                <div class="quick-card" onclick="goTo('records')"><div class="qc-icon"></div><div class="qc-title">شواهد الحضور</div><div class="qc-sub">سجل جميع الأيام</div></div>
+            </div>
+        </div>
+        <div class="screen" id="sc-lessons">
+            <div class="page-heading"><h1>الدروس</h1><p>اختر الدرس للبدء</p></div>
+            <div class="lessons-grid" id="lessonsList"></div>
+        </div>
+        <div class="screen" id="sc-lesson-view">
+            <div class="lesson-topbar">
+                <div class="back-btn" onclick="goTo('lessons')">←</div>
+                <h2 id="lTitle"></h2>
+                <div class="fs-btn" onclick="openFS()" title="تكبير العرض">⛶</div>
+            </div>
+            <div class="prog-wrap">
+                <div class="prog-labels"><span id="progLabel">الصفحة 1</span><span id="progTotal"></span></div>
+                <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+            </div>
+            <div id="pageContent"></div>
+            <div class="page-nav" id="pageNav">
+                <button class="pnav-btn" id="prevBtn" onclick="prevPage()">← السابق</button>
+                <button class="pnav-btn primary" id="nextBtn" onclick="nextPage()">التالي →</button>
+            </div>
+            <div id="qBox" style="display:none"></div>
+        </div>
+        <div class="screen" id="sc-attend">
+            <div class="att-toprow">
+                <div class="page-heading" style="margin-bottom:0"><h1>تسجيل الحضور</h1></div>
+                <button class="btn-primary" onclick="openModal('addClass')">+ إضافة فصل</button>
+            </div>
+            <div class="class-tabs" id="classTabs"></div>
+            <div id="attBody"><div class="empty-state"><div class="ei"></div><p>أضف فصلاً للبدء</p></div></div>
+        </div>
+        <div class="screen" id="sc-records">
+            <div class="page-heading"><h1>شواهد الحضور</h1><p>سجل جميع أيام الحضور والغياب</p></div>
+            <div id="recordsBody"><div class="empty-state"><div class="ei"></div><p>لا توجد سجلات بعد</p></div></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ✅ تصفية الصفحات والأسئلة الفارغة {} تلقائياً
+const lessonsRaw = [
+  {
+    title: "الانقسام المتساوي وانقسام السيتوبلازم",
+    video: null,
+    pages: [
+      { type:"img-only",  image:"https://a.top4top.io/p_37689q9zw1.png", text:"" },
+      { type:"img-text",  image:"https://e.top4top.io/p_3768pjz121.png", text:"تسمى المرحلة الاولى من الانقسام المتساوي بالطور التمهيدي وكذلك يسمى بالطور الاول" },
+      { type:"text-only", image:null, text:"كل نصف من الكروموسوم يسمى بالكروماتيد الشقيق تراكيب تحوي نسخا متطابقه من DNA اما التراكيب الذي في منتصف الكروموسوم والذي يربط الكروماتيدات الشقيقة بعضها مع بعض فيسمى السنترومير" },
+      {},
+      { type:"img-text",  image:"https://b.top4top.io/p_3768fstnt1.png", text:"الطور الاستوائي هو الطور الثاني من ابانقسام المتساوي" },
+      { type:"text-only", image:null, text:"يسمى التركيب الكلي الذي يضم الخيوط المغزليه و المريكزات والالياف النجمية الجهاز المغزلي حيث ان الجهاز المغزلي اهمية كبرى في حركة الكروموسومات و تنظيمها قبل الانقسام الخليه" }
+    ],
+    questions: [
+      { q:"الانقسام المتساوي يحدث في الخلايا الجسدية فقط.", a:true },
+      { q:"الانقسام المنصف ينتج خليتين متماثلتين تمامًا.", a:false },
+      { q:"عدد الكروموسومات في الانقسام المتساوي يبقى ثابتًا.", a:true },
+      {},
+      { q:"الانقسام المنصف يحدث في الخلايا الجنسية لإنتاج الأمشاج.", a:true },
+      {},
+      { q:"في الانقسام المتساوي، الخلايا الناتجة تكون مختلفة وراثيًا.", a:false },
+      { q:"الطور التمهيدي هو أول مرحلة في الانقسام المتساوي.", a:true }
+    ]
+  },
+  {
+    title: "التركيب الضوئي",
+    video: null,
+    pages: [
+      { type:"img-only",  image:null, text:"" },
+      { type:"img-text",  image:null, text:"تحدث عملية التركيب الضوئي في البلاستيدات الخضراء التي تحتوي على الكلوروفيل." },
+      { type:"text-only", image:null, text:"تحول النباتات ضوء الشمس وثاني أكسيد الكربون والماء إلى غلوكوز وأكسجين." }
+    ],
+    questions: [
+      { q:"التركيب الضوئي يحدث في الميتوكوندريا", a:false },
+      { q:"الأكسجين ناتج ثانوي من التركيب الضوئي", a:true }
+    ]
+  }
+];
+
+// تصفية العناصر الفارغة
+const lessons = lessonsRaw.map(l => ({
+  ...l,
+  pages:     (l.pages     || []).filter(p => p && p.type),
+  questions: (l.questions || []).filter(q => q && q.q !== undefined)
+}));
+
+let classes   = JSON.parse(localStorage.getItem("bio_cls") || "[]");
+let curClass  = 0;
+function saveClasses(){ localStorage.setItem("bio_cls", JSON.stringify(classes)); }
+
+let curLesson=0, curPage=0, attEntries=[], curQIndex=0, qScore=0;
+let fsQIndex=0, fsQScore=0;
+
+window.addEventListener("load", ()=>{
+    setTimeout(()=>{
+        const l=document.getElementById("loading");
+        l.classList.add("hide");
+        setTimeout(()=>l.style.display="none",600);
+        buildLessonsList(); updateStats();
+    },2000);
+});
+
+function updateStats(){
+    document.getElementById("stat-lessons").innerText=lessons.length;
+    document.getElementById("stat-classes").innerText=classes.length;
+    document.getElementById("stat-students").innerText=classes.reduce((s,c)=>s+c.students.length,0);
+    document.getElementById("stat-records").innerText=classes.reduce((s,c)=>s+(c.records||[]).length,0);
+}
+
+document.getElementById("overlay").addEventListener("click",closeSidebar);
+function toggleSidebar(){ document.getElementById("sidebar").classList.toggle("open"); document.getElementById("overlay").classList.toggle("show"); }
+function closeSidebar(){ document.getElementById("sidebar").classList.remove("open"); document.getElementById("overlay").classList.remove("show"); }
+
+function goTo(screen){
+    closeSidebar();
+    document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
+    document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("on"));
+    const map={home:"sc-home",lessons:"sc-lessons","lesson-view":"sc-lesson-view",attend:"sc-attend",records:"sc-records"};
+    const niMap={home:"ni-home",lessons:"ni-lessons",attend:"ni-attend",records:"ni-records"};
+    if(map[screen]) document.getElementById(map[screen]).classList.add("on");
+    if(niMap[screen]) document.getElementById(niMap[screen]).classList.add("on");
+    if(screen==="attend") renderAttendance();
+    if(screen==="records") renderRecords();
+}
+
+function buildLessonsList(){
+    document.getElementById("lessonsList").innerHTML=lessons.map((l,i)=>`
+        <div class="lesson-card" onclick="openLesson(${i})">
+            <div class="lesson-num">${i+1}</div>
+            <div class="lesson-info"><h3>${l.title}</h3><p>${l.pages.length} صفحات · ${l.questions.length} أسئلة</p></div>
+            <div class="lesson-arrow">←</div>
+        </div>`).join("");
+}
+
+function openLesson(i){ curLesson=i; curPage=0; curQIndex=0; qScore=0; document.getElementById("lTitle").innerText=lessons[i].title; goTo("lesson-view"); renderPage(); }
+
+function buildPageHTML(li,pi){
+    const pg=lessons[li].pages[pi];
+    const noImg=`<div class="placeholder-box"><div class="ico"></div><div class="lbl">لم تُضف صورة بعد</div><div class="sub">أضف رابط الصورة في الكود</div></div>`;
+    let html='<div class="page-card">';
+    if(pg.type==="img-only"){ html+=pg.image?`<img src="${pg.image}" class="page-img-only" alt="صورة">`:noImg; }
+    else if(pg.type==="img-text"){ html+=(pg.image?`<img src="${pg.image}" class="page-img-top" alt="صورة">`:noImg)+`<div class="page-text">${pg.text}</div>`; }
+    else { html+=`<div class="page-text-only">${pg.text}</div>`; }
+    if(pi===2&&lessons[li].video) html+=`<div class="watch-wrap"><a class="btn-watch" href="${lessons[li].video}" target="_blank" rel="noopener">▶ Watch</a><span class="watch-label">مشاهدة الدرس</span></div>`;
+    return html+'</div>';
+}
+
+function buildFSPageHTML(li,pi){
+    const pg=lessons[li].pages[pi]; const vid=lessons[li].video;
+    const imgTag=pg.image?`<img src="${pg.image}" alt="صورة">`:`<div class="fs-placeholder"><div class="ico">🖼️</div><span>لم تُضف صورة بعد</span></div>`;
+    const watchBar=(pi===2&&vid)?`<div class="fs-watch-wrap"><a class="btn-watch-fs" href="${vid}" target="_blank" rel="noopener">▶ Watch</a><span class="fs-watch-label">مشاهدة الدرس</span></div>`:"";
+    if(pg.type==="img-only") return `<div class="fs-img-only-wrap">${imgTag}</div>${watchBar}`;
+    if(pg.type==="img-text") return `<div class="fs-img-text-wrap"><div class="fs-img-half">${imgTag}</div><div class="fs-text-half">${pg.text}</div></div>${watchBar}`;
+    return `<div class="fs-text-only-wrap"><div class="fs-text-inner">${pg.text}</div></div>${watchBar}`;
+}
+
+function renderPage(){
+    const data=lessons[curLesson],total=data.pages.length;
+    if(curPage<total){
+        document.getElementById("qBox").style.display="none";
+        document.getElementById("pageNav").style.display="flex";
+        document.getElementById("pageContent").innerHTML=buildPageHTML(curLesson,curPage);
+        const pct=(curPage+1)/(total+1)*100;
+        document.getElementById("progFill").style.width=pct+"%";
+        document.getElementById("progLabel").innerText="الصفحة "+(curPage+1);
+        document.getElementById("progTotal").innerText="من "+total+" + أسئلة";
+        document.getElementById("prevBtn").disabled=curPage===0;
+        document.getElementById("nextBtn").innerText=curPage===total-1?"الأسئلة →":"التالي →";
+    } else { curQIndex=0; qScore=0; showQuestion(); }
+}
+function nextPage(){ curPage++; renderPage(); }
+function prevPage(){ if(curPage>0){curPage--;renderPage();} }
+
+function showQuestion(){
+    const data=lessons[curLesson],total=data.questions.length;
+    document.getElementById("pageContent").innerHTML="";
+    document.getElementById("pageNav").style.display="none";
+    document.getElementById("progFill").style.width="100%";
+    document.getElementById("progLabel").innerText="الأسئلة";
+    document.getElementById("progTotal").innerText=`${curQIndex+1} / ${total}`;
+    const box=document.getElementById("qBox"); box.style.display="block";
+    if(curQIndex>=total){
+        box.innerHTML=`<div class="q-done-card"><div class="q-done-icon">${qScore===total?"🏆":qScore>=total/2?"🎯":"📝"}</div><div class="q-done-title">انتهت الأسئلة!</div><div class="q-score">${qScore} / ${total}</div><div class="q-done-sub">إجاباتك الصحيحة من أصل ${total} سؤال</div></div>`;
+        return;
+    }
+    const q=data.questions[curQIndex];
+    box.innerHTML=`<div class="q-header"><h3>🧪 أسئلة الدرس</h3><span class="q-counter">سؤال ${curQIndex+1} من ${total}</span></div>
+        <div class="q-card"><div class="q-text">${q.q}</div>
+        <div class="ans-btns"><button class="ans-btn gbtn" id="gbtn" onclick="checkAnswer(true)">✓ صح</button><button class="ans-btn rbtn" id="rbtn" onclick="checkAnswer(false)">✗ خطأ</button></div>
+        <div class="res-area" id="resArea"></div></div>`;
+}
+
+function checkAnswer(val){
+    const q=lessons[curLesson].questions[curQIndex]; const ok=val===q.a; if(ok) qScore++;
+    document.getElementById("gbtn").disabled=true; document.getElementById("rbtn").disabled=true;
+    if(q.a) document.getElementById("gbtn").classList.add("right"); else document.getElementById("rbtn").classList.add("right");
+    if(!ok)(val?document.getElementById("gbtn"):document.getElementById("rbtn")).classList.add("wrong");
+    const isLast=curQIndex===lessons[curLesson].questions.length-1;
+    document.getElementById("resArea").innerHTML=`<div class="res-badge ${ok?'ok':'bad'}">${ok?'✔ إجابة صحيحة!':'✘ خاطئة — الصحيح: '+(q.a?'صح':'خطأ')}</div><button class="q-next-btn" onclick="nextQuestion()">${isLast?' النتيجة':'التالي ←'}</button>`;
+}
+function nextQuestion(){ curQIndex++; showQuestion(); }
+
+let fsPage=0;
+function openFS(){ fsPage=curPage; fsQIndex=0; fsQScore=0; document.getElementById("fsNext").style.display=""; document.getElementById("fsOverlay").classList.add("show"); document.getElementById("fsTitle").innerText=lessons[curLesson].title; renderFSPage(); }
+function closeFS(){ document.getElementById("fsOverlay").classList.remove("show"); document.getElementById("fsNext").style.display=""; curPage=Math.min(fsPage,lessons[curLesson].pages.length-1); renderPage(); }
+
+function buildFSQuestionHTML(){
+    const data=lessons[curLesson],total=data.questions.length;
+    document.getElementById("fsFill").style.width="100%";
+    const nxtBtn=document.getElementById("fsNext");
+    if(fsQIndex>=total){
+        nxtBtn.innerText="إغلاق"; nxtBtn.onclick=closeFS; document.getElementById("fsPrev").disabled=true;
+        return `<div class="fs-q-wrap"><div class="q-done-card"><div class="q-done-icon">${fsQScore===total?"🏆":fsQScore>=total/2?"🎯":"📝"}</div><div class="q-done-title">انتهت الأسئلة!</div><div class="q-score">${fsQScore} / ${total}</div><div class="q-done-sub">إجاباتك الصحيحة من أصل ${total} سؤال</div><button class="q-next-btn" style="margin-top:16px" onclick="closeFS()">🔄 العودة للدرس</button></div></div>`;
+    }
+    nxtBtn.style.display="none"; document.getElementById("fsPrev").disabled=true;
+    const q=data.questions[fsQIndex];
+    return `<div class="fs-q-wrap"><div class="q-header"><h3>🧪 أسئلة الدرس</h3><span class="q-counter">سؤال ${fsQIndex+1} من ${total}</span></div>
+        <div class="q-card"><div class="q-text">${q.q}</div>
+        <div class="ans-btns"><button class="ans-btn gbtn" id="fs-gbtn" onclick="fsCheckAnswer(true)">✓ صح</button><button class="ans-btn rbtn" id="fs-rbtn" onclick="fsCheckAnswer(false)">✗ خطأ</button></div>
+        <div class="res-area" id="fs-resArea"></div></div></div>`;
+}
+
+function fsCheckAnswer(val){
+    const q=lessons[curLesson].questions[fsQIndex]; const ok=val===q.a; if(ok) fsQScore++;
+    document.getElementById("fs-gbtn").disabled=true; document.getElementById("fs-rbtn").disabled=true;
+    if(q.a) document.getElementById("fs-gbtn").classList.add("right"); else document.getElementById("fs-rbtn").classList.add("right");
+    if(!ok)(val?document.getElementById("fs-gbtn"):document.getElementById("fs-rbtn")).classList.add("wrong");
+    const isLast=fsQIndex===lessons[curLesson].questions.length-1;
+    document.getElementById("fs-resArea").innerHTML=`<div class="res-badge ${ok?'ok':'bad'}">${ok?'✔ إجابة صحيحة!':'✘ خاطئة — الصحيح: '+(q.a?'صح':'خطأ')}</div><button class="q-next-btn" onclick="fsNextQuestion()">${isLast?'📊 النتيجة':'التالي ←'}</button>`;
+}
+function fsNextQuestion(){ fsQIndex++; renderFSPage(); }
+
+function renderFSPage(){
+    const data=lessons[curLesson],total=data.pages.length,nxtBtn=document.getElementById("fsNext");
+    nxtBtn.style.display="";
+    if(fsPage<total){
+        document.getElementById("fsBody").innerHTML=buildFSPageHTML(curLesson,fsPage);
+        document.getElementById("fsFill").style.width=((fsPage+1)/(total+1)*100)+"%";
+        document.getElementById("fsPrev").disabled=fsPage===0;
+        nxtBtn.innerText=fsPage===total-1?"الأسئلة →":"التالي →"; nxtBtn.onclick=fsNextPage;
+    } else { document.getElementById("fsBody").innerHTML=buildFSQuestionHTML(); }
+}
+function fsNextPage(){ fsPage++; renderFSPage(); }
+function fsPrevPage(){ if(fsPage>0){fsPage--;renderFSPage();} }
+
+function todayKey(){ return new Date().toISOString().slice(0,10); }
+function todayLabel(){ return new Date().toLocaleDateString("ar-SA",{weekday:"long",year:"numeric",month:"long",day:"numeric"}); }
+function nextDayLabel(key){ const d=new Date(key); d.setDate(d.getDate()+1); return d.toLocaleDateString("ar-SA",{weekday:"long",year:"numeric",month:"long",day:"numeric"}); }
+function nextDayKey(key){ const d=new Date(key); d.setDate(d.getDate()+1); return d.toISOString().slice(0,10); }
+
+function renderClassTabs(){
+    const el=document.getElementById("classTabs"); if(!el) return;
+    el.innerHTML=classes.map((c,i)=>`<div class="ctab-wrap ${i===curClass?'on':''}"><button class="ctab-name" onclick="selClass(${i})">${c.name}</button><button class="ctab-del" onclick="deleteClass(${i})" title="حذف الفصل">✕</button></div>`).join("");
+}
+function selClass(i){ curClass=i; renderClassTabs(); renderAttendance(); }
+function deleteClass(i){
+    if(!confirm(`هل تريد حذف فصل "${classes[i].name}" وجميع سجلاته؟`)) return;
+    classes.splice(i,1); if(curClass>=classes.length) curClass=Math.max(0,classes.length-1);
+    saveClasses(); updateStats(); renderClassTabs(); renderAttendance(); toast("🗑️ تم حذف الفصل");
+}
+
+function getSessionKey(){
+    const cls=classes[curClass]; if(!cls.records||!cls.records.length) return todayKey();
+    const sorted=[...cls.records].sort((a,b)=>b.key.localeCompare(a.key)); const latest=sorted[0].key; const tKey=todayKey();
+    return latest>=tKey?nextDayKey(latest):tKey;
+}
+
+function renderAttendance(){
+    renderClassTabs(); const body=document.getElementById("attBody");
+    if(!classes.length){ body.innerHTML=`<div class="empty-state"><div class="ei"></div><p>أضف فصلاً للبدء</p></div>`; return; }
+    const cls=classes[curClass],sessKey=getSessionKey(),sessLabel=sessKey===todayKey()?todayLabel():nextDayLabel(todayKey());
+    attEntries=cls.students.map(name=>({name,status:""}));
+    const rows=attEntries.map((e,i)=>`<div class="s-row" id="sr${i}"><div class="s-avatar">${e.name.trim().charAt(0)}</div><div class="s-name">${e.name}</div><div class="st-btns"><button class="st-btn sp" onclick="setStatus(${i},'p')">حضور</button><button class="st-btn sa" onclick="setStatus(${i},'a')">غياب</button><button class="st-btn se" onclick="setStatus(${i},'e')">بعذر</button></div></div>`).join("");
+    body.innerHTML=`<div class="toolbar"><div class="search-wrap"><span class="search-icon">🔍</span><input type="text" placeholder="ابحث عن طالب..." oninput="filterStudents(this.value)"></div><button class="btn-sm" onclick="openModal('addStudent')">+ طالب</button><button class="btn-sm red" onclick="openModal('delStudent')">حذف</button></div>
+        <div class="date-badge"> ${sessLabel}</div>
+        <div class="day-input-wrap"><label>اكتب اليوم / الملاحظة:</label><input type="text" id="dayNoteInput" placeholder="مثال: الأحد الأول من الفصل الثاني"></div>
+        <div class="student-list" id="sList">${rows}</div>
+        <div class="save-row"><button class="btn-save" onclick="saveAttendance('${sessKey}','${sessLabel}')"> حفظ الحضور</button></div>`;
+}
+
+function filterStudents(q){ document.querySelectorAll(".s-row").forEach(row=>{ row.style.display=row.querySelector(".s-name").innerText.includes(q)?"":"none"; }); }
+function setStatus(i,st){
+    if(i>=attEntries.length) return; attEntries[i].status=st;
+    const row=document.getElementById("sr"+i); if(!row) return;
+    row.className="s-row "+(st==="p"?"sp":st==="a"?"sa":"se");
+    row.querySelectorAll(".st-btn").forEach(b=>b.classList.remove("sel"));
+    const t=row.querySelector(".st-btn."+st); if(t) t.classList.add("sel");
+}
+function saveAttendance(sessKey,sessLabel){
+    if(!classes.length||curClass>=classes.length){ toast(" لا يوجد فصل!"); return; }
+    const cls=classes[curClass]; const dayNote=(document.getElementById("dayNoteInput")||{}).value||"";
+    const entries=attEntries.map(e=>({name:e.name,status:e.status||"a"}));
+    if(!cls.records) cls.records=[];
+    const idx=cls.records.findIndex(r=>r.key===sessKey);
+    const rec={key:sessKey,date:sessLabel,dayNote,entries};
+    if(idx>=0) cls.records[idx]=rec; else cls.records.push(rec);
+    saveClasses(); updateStats(); toast("تم حفظ الحضور بنجاح ✅");
+    setTimeout(()=>renderAttendance(),80);
+}
+
+function renderRecords(){
+    const body=document.getElementById("recordsBody"); const allRecs=[];
+    classes.forEach(cls=>{ (cls.records||[]).forEach(rec=>allRecs.push({className:cls.name,...rec})); });
+    if(!allRecs.length){ body.innerHTML=`<div class="empty-state"><div class="ei"></div><p>لا توجد سجلات بعد</p></div>`; return; }
+    allRecs.sort((a,b)=>b.key.localeCompare(a.key));
+    body.innerHTML=allRecs.map((rec,idx)=>`<div class="records-screen-card"><div class="rsc-class"> ${rec.className}</div><div class="rsc-entry"><div class="rec-date"> ${rec.date}</div>${rec.dayNote?`<div class="rec-day-note"> ${rec.dayNote}</div>`:""}${rec.entries.map(e=>`<div class="rec-row"><span>${e.name}</span><span><span class="dot ${e.status==='p'?'dp':e.status==='a'?'da':'de'}"></span>${e.status==='p'?'حضور':e.status==='a'?'غياب':'غياب بعذر'}</span></div>`).join("")}<div class="rec-actions"><button class="rec-act-btn edit" onclick="editRecNote(${idx})"> تعديل الملاحظة</button><button class="rec-act-btn del" onclick="deleteRec(${idx})"> حذف السجل</button></div></div></div>`).join("");
+    window._allRecs=allRecs;
+}
+
+function editRecNote(idx){
+    const rec=window._allRecs[idx];
+    openModalCustom("تعديل الملاحظة",rec.dayNote||"","حفظ",(val)=>{
+        const cls=classes.find(c=>c.name===rec.className); if(!cls) return;
+        const r=(cls.records||[]).find(r=>r.key===rec.key); if(!r) return;
+        r.dayNote=val; saveClasses(); toast("✅ تم تعديل الملاحظة!"); renderRecords();
+    });
+}
+function deleteRec(idx){
+    const rec=window._allRecs[idx]; if(!confirm("هل تريد حذف هذا السجل؟")) return;
+    const cls=classes.find(c=>c.name===rec.className); if(!cls) return;
+    const i=(cls.records||[]).findIndex(r=>r.key===rec.key); if(i>=0) cls.records.splice(i,1);
+    saveClasses(); updateStats(); toast("🗑️ تم حذف السجل!"); renderRecords();
+}
+
+let modalMode="",modalCallback=null;
+function openModal(mode){
+    modalMode=mode; modalCallback=null;
+    const titles={addClass:"إضافة فصل",addStudent:"إضافة طالب",delStudent:"حذف طالب"};
+    const hints={addClass:"مثال: الصف الأول أ",addStudent:"اكتب اسم الطالب الثلاثي",delStudent:"اكتب اسم الطالب للحذف"};
+    document.getElementById("mTitle").innerText=titles[mode]; document.getElementById("mInput").placeholder=hints[mode]; document.getElementById("mInput").value="";
+    document.querySelector(".mbtn-ok").innerText="تأكيد";
+    document.getElementById("modalBg").classList.add("show"); setTimeout(()=>document.getElementById("mInput").focus(),100);
+}
+function openModalCustom(title,currentVal,btnLabel,cb){
+    modalMode="custom"; modalCallback=cb;
+    document.getElementById("mTitle").innerText=title; document.getElementById("mInput").placeholder=""; document.getElementById("mInput").value=currentVal;
+    document.querySelector(".mbtn-ok").innerText=btnLabel;
+    document.getElementById("modalBg").classList.add("show"); setTimeout(()=>document.getElementById("mInput").focus(),100);
+}
+function closeModal(){ document.getElementById("modalBg").classList.remove("show"); document.querySelector(".mbtn-ok").innerText="تأكيد"; }
+function modalOK(){
+    const val=document.getElementById("mInput").value.trim();
+    if(modalMode==="custom"){ if(modalCallback) modalCallback(val); closeModal(); return; }
+    if(!val) return;
+    if(modalMode==="addClass"){ classes.push({name:val,students:[],records:[]}); curClass=classes.length-1; saveClasses(); closeModal(); updateStats(); renderClassTabs(); renderAttendance(); }
+    else if(modalMode==="addStudent"){ if(!classes.length) return; classes[curClass].students.push(val); saveClasses(); closeModal(); updateStats(); renderAttendance(); }
+    else if(modalMode==="delStudent"){ if(!classes.length) return; const i=classes[curClass].students.indexOf(val); if(i>=0){classes[curClass].students.splice(i,1);saveClasses();toast(" تم الحذف");updateStats();} closeModal(); renderAttendance(); }
+}
+document.getElementById("modalBg").addEventListener("click",e=>{ if(e.target===document.getElementById("modalBg")) closeModal(); });
+document.getElementById("mInput").addEventListener("keydown",e=>{ if(e.key==="Enter") modalOK(); });
+
+function toast(msg){ const t=document.createElement("div"); t.className="toast"; t.innerText=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2500); }
+</script>
+</body>
+</html>
